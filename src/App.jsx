@@ -1,18 +1,19 @@
 import { View, Text, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import FlashMessage from "react-native-flash-message";
 
 import DetailsScreen from "./screens/Details";
 import Navigator from "./navigation/Navigator";
 
+import FavoritesProvider from "./context/context";
+
 const App = () => {
   return (
-    <>
-      {/* <NavigationContainer> */}
+    <FavoritesProvider>
       <StatusBar translucent={false} />
-      {/* <DetailsScreen /> */}
       <Navigator />
-      {/* </NavigationContainer> */}
-    </>
+      <FlashMessage position={"top"} />
+    </FavoritesProvider>
   );
 };
 

@@ -7,39 +7,100 @@ import {
   Text,
   TouchableWithoutFeedback,
   View,
+  TouchableOpacity,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Swiper from "react-native-swiper";
 import ImageView from "react-native-image-viewing";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { Rating } from "react-native-ratings";
+import { Avatar } from "react-native-elements";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  where,
+  serverTimestamp,
+} from "firebase/firestore";
+import { showMessage } from "react-native-flash-message";
+import * as Yup from "yup";
+import { Formik } from "formik";
 
 import { colors } from "../constants/colors";
 import AppButtonBg from "../components/AppButton";
+import AppTextInput from "../components/AppTextInput";
+import AppReviewBox from "../components/AppReviewBox";
+import AppFormField from "../components/AppFormField";
 
-const DetailsScreen = () => {
+import { FavoritesContext } from "../context/context";
+import { firestore } from "../../firebaseConfig.js";
+
+const DetailsScreen = ({ route }) => {
   const [currentImage, setCurrentImage] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [rating, setRating] = useState(3.5);
+  const [reviews, setReviews] = useState([]);
   const navigation = useNavigation();
+
+  const listing = route.params;
 
   const statusBarHeight = StatusBar.currentHeight;
 
-  const listing = {
-    name: "Pronto Restaurant",
-    address: "Ilorin 240102, Kwara",
-    Phone: "090155577711",
-    images: [require("../assets/IMG-20240611-WA0035.jpg")],
-    location: "Ilorin",
+  const { favorites, saveData } = useContext(FavoritesContext);
+
+  const inFavorites = (listing) => {
+    return favorites.some((item) => item.name === listing.name);
   };
+
+  const uploadReview = (name, review, rating) => {
+    addDoc(collection(firestore, listing.name), {
+      name,
+      review,
+      rating,
+      createdAt: serverTimestamp(),
+    })
+      .then((documentRef) => {
+        console.log(documentRef);
+        showMessage({
+          type: "success",
+          message: "Your review has been posted",
+        });
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const getReviews = () => {
+    console.log("tapped");
+    const ref = collection(firestore, listing.name);
+
+    const documentsQuery = query(ref, orderBy("createdAt", "desc"));
+    getDocs(documentsQuery)
+      .then((snapshot) => {
+        snapshot.docs.forEach((review) => console.log(review));
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().required("Name is required"),
+    review: Yup.string().required("Enter your review"),
+  });
   return (
     <View style={styles.container}>
       <View style={styles.images}>
         <Swiper
           style={{ height: "100%" }}
           autoplay={true}
-          autoplayTimeout={5}
+          autoplayTimeout={4}
           activeDotColor={colors.primary}
-          showsButtons={true}
+          // showsButtons={true}
         >
           {listing.images.map((image, index) => (
             <TouchableWithoutFeedback
@@ -54,18 +115,102 @@ const DetailsScreen = () => {
           ))}
         </Swiper>
       </View>
+
       <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
         <View style={[styles.backButton, { top: statusBarHeight + 5 }]}>
           <Ionicons name="arrow-back" size={24} />
         </View>
       </TouchableWithoutFeedback>
+
       <View style={styles.details}>
-        <Text style={[styles.text, { fontWeight: "600", fontSize: 20 }]}>
-          {listing.name}
-        </Text>
-        <Text style={styles.text}>Location: {listing.location}</Text>
-        <Text style={styles.text}>Address: {listing.address}</Text>
-        <AppButtonBg text={"Place an order"} compStyle={{ marginTop: 50 }} />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.title}>
+            <Text style={[styles.text, { fontWeight: "600", fontSize: 20 }]}>
+              {listing.name}
+            </Text>
+            <AntDesign
+              name={inFavorites(listing) ? "heart" : "hearto"}
+              color={colors.primary}
+              size={24}
+              onPress={() => saveData(listing)}
+            />
+          </View>
+          <Text style={styles.text}>Location: {listing.location}</Text>
+          <Text style={styles.text}>Address: {listing.address}</Text>
+
+          <View>
+            <Text style={[styles.text, { fontWeight: "600", fontSize: 20 }]}>
+              Reviews
+            </Text>
+          </View>
+          {reviews &&
+            reviews.map((review, index) => (
+              <AppReviewBox name={review.name} review={review.review} />
+            ))}
+          <AppReviewBox name={"Divine"} review={"A very chill place"} />
+          <AppReviewBox name="Opeyemi" review={"NIce foods"} />
+          <AppReviewBox name={"Vic"} review={"Good customer service"} />
+          <Text
+            style={styles.more}
+            onPress={() =>
+              navigation.navigate("Reviews", { listingName: listing.name })
+            }
+          >
+            See more...
+          </Text>
+          <Text style={styles.tex} onPress={getReviews}>
+            Load Reviews
+          </Text>
+
+          <View>
+            <Text style={[styles.text, { fontWeight: "600", fontSize: 20 }]}>
+              Leave a review
+            </Text>
+
+            <Formik
+              initialValues={{
+                name: "",
+                review: "",
+              }}
+              validationSchema={validationSchema}
+              onSubmit={(values) => {
+                const { name, review } = values;
+
+                uploadReview(name, review, rating);
+              }}
+            >
+              {({ handleSubmit }) => (
+                <>
+                  <AppFormField name={"name"} placeholder={"Name"} multiline />
+                  <AppFormField
+                    placeholder={"Enter review..."}
+                    customStyles={{ height: 70 }}
+                    multiline
+                    name="review"
+                  />
+                  <View style={styles.ratings}>
+                    <Text style={styles.text}>Rating: </Text>
+                    <Rating
+                      fractions={1}
+                      startingValue={3.5}
+                      onFinishRating={(rating) => setRating(rating)}
+                      imageSize={15}
+                      // style={{ marginTop: 0 }}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleSubmit}
+                  >
+                    <Text style={{ color: colors.white }}>Submit</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </Formik>
+          </View>
+
+          <AppButtonBg text={"Place an order"} compStyle={{ marginTop: 50 }} />
+        </ScrollView>
       </View>
       {/* <ImageView
         images={listing.images.map((image) => ({ uri: image }))}
@@ -90,26 +235,51 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 40,
   },
+  button: {
+    alignSelf: "flex-end",
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 5,
+    height: 30,
+    justifyContent: "center",
+    width: 50,
+  },
   container: {
     flex: 1,
   },
   details: {
     backgroundColor: colors.white,
-    height: "35%",
-
+    // height: "35%",
+    flex: 1,
+    paddingBottom: 10,
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
   images: {
-    height: "65%",
+    height: "55%",
   },
   image: {
     height: 600,
     width: "100%",
   },
+  more: {
+    color: colors.primary,
+    marginTop: 5,
+    textAlign: "right",
+  },
+  ratings: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 30,
+  },
   text: {
     fontSize: 18,
     marginVertical: 10,
+  },
+  title: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   topDetails: {
     alignItems: "center",

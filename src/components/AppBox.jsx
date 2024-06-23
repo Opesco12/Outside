@@ -5,25 +5,32 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { useContext } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 
 import { colors } from "../constants/colors";
+import { FavoritesContext } from "../context/context";
 
-const AppBox = ({ post, onPress }) => {
-  const navigation = useNavigation();
+const AppBox = ({ listing, onPress }) => {
+  const { favorites, saveData } = useContext(FavoritesContext);
+
+  const inFavorites = (listing) => {
+    return favorites.some((item) => item.name === listing.name);
+  };
+
   const thumbnailImages =
-    post.images.length > 1 ? post.images.slice(0, 2) : post.images[0];
+    listing.images.length > 1 ? listing.images.slice(0, 2) : listing.images[0];
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <View style={styles.container}>
         <View style={styles.top}>
-          {post.images.length > 1 ? (
+          {listing.images.length > 1 ? (
             thumbnailImages.map((image, index) => (
-              <Image src={image} key={index} style={styles.images} />
+              <Image source={image} key={index} style={styles.images} />
             ))
           ) : (
-            <Image source={post.images[0]} style={styles.image} />
+            <Image source={listing.images[0]} style={styles.image} />
           )}
         </View>
         <View style={styles.bottom}>
@@ -35,12 +42,17 @@ const AppBox = ({ post, onPress }) => {
             }}
           >
             <Text style={[styles.text, { fontWeight: "600" }]}>
-              {post.name}
+              {listing.name}
             </Text>
-            <AntDesign name="hearto" color={colors.primary} size={24} />
+            <AntDesign
+              name={inFavorites(listing) ? "heart" : "hearto"}
+              color={colors.primary}
+              size={24}
+              onPress={() => saveData(listing)}
+            />
           </View>
           <Text numberOfLines={1} style={styles.text}>
-            Location: {post.location}
+            Location: {listing.location}
           </Text>
         </View>
       </View>

@@ -12,7 +12,7 @@ const AppScreen = ({ children, customStyles, screen }) => {
   };
 
   const onPress = (screen) => {
-    if (screen === "Details") {
+    if (screen === "Reviews") {
       return goBack;
     }
   };
@@ -22,7 +22,7 @@ const AppScreen = ({ children, customStyles, screen }) => {
       <AppHeader
         backgroundColor={colors.primary}
         leftComponent={{
-          icon: screen === "Details" && "arrow-back",
+          icon: screen === "Reviews" && "arrow-back",
           color: colors.white,
           onPress: onPress(screen),
         }}
