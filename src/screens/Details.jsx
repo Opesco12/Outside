@@ -172,9 +172,9 @@ const DetailsScreen = ({ route }) => {
             icon={
               <FontAwesome5 name="directions" color={colors.white} size={24} />
             }
-            onPress={() =>
-              showDirections(listing.name + ", " + listing.address)
-            }
+            onPress={() => {
+              showDirections(listing.name + ", " + listing.address);
+            }}
             compStyle={{ width: "35%", textAlign: "center" }}
           />
           <View>

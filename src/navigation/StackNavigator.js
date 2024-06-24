@@ -7,9 +7,7 @@ import ReviewScreen from "../screens/ReviewScreen";
 const StackNavigator = () => {
   const Stack = createStackNavigator();
   return (
-    <Stack.Navigator
-      screenOptions={{ headerShown: false, gestureDirection: "horizontal" }}
-    >
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Index" component={TabNavigator} />
       <Stack.Screen name="Details" component={DetailsScreen} />
       <Stack.Screen name="Reviews" component={ReviewScreen} />
