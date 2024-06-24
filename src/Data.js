@@ -75,24 +75,24 @@ export const data = [
     imagesPath: ["./assets/Outside/red_caffino.jpg"],
     location: "Ilorin",
   },
-  {
-    name: "FunCity Family Park",
-    type: "resort",
-    address: "FHXP+637, Fate Rd, Oko Erin 240102, Kwara",
-    images: [require("./assets/Outside/fun_city.jpg")],
-    imagesPath: ["./assets/Outside/fun_city.jpg"],
-    location: "Oko Erin",
-  },
-  {
-    name: "Number 8 Apartment",
-    type: "lodge",
-    location: "Ilorin",
-    images: [
-      require("./assets/Outside/n8.png"),
-      require("./assets/Outside/n8_2.jpg"),
-    ],
-    imagesPath: ["./assets/Outside/n8.png", "./assets/Outside/n8_2.jpg"],
-  },
+  // {
+  //   name: "FunCity Family Park",
+  //   type: "resort",
+  //   address: "FHXP+637, Fate Rd, Oko Erin 240102, Kwara",
+  //   images: [require("./assets/Outside/fun_city.jpg")],
+  //   imagesPath: ["./assets/Outside/fun_city.jpg"],
+  //   location: "Oko Erin",
+  // },
+  // {
+  //   name: "Number 8 Apartment",
+  //   type: "lodge",
+  //   location: "Ilorin",
+  //   images: [
+  //     require("./assets/Outside/n8.png"),
+  //     require("./assets/Outside/n8_2.jpg"),
+  //   ],
+  //   imagesPath: ["./assets/Outside/n8.png", "./assets/Outside/n8_2.jpg"],
+  // },
   {
     name: "Diamond Park",
     type: "resort",
