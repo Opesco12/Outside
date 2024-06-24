@@ -14,13 +14,19 @@ const FavoritesScreen = () => {
     <AppScreen screen={"Favorites"}>
       {favorites &&
         favorites.length > 0 &&
-        favorites.map((listing, index) => (
-          <AppBox
-            listing={listing}
-            onPress={() => navigation.navigate("Details", listing)}
-            key={index}
-          />
-        ))}
+        favorites
+          .map((listing, index, array) => ({
+            listing,
+            key: array.length - 1 - index,
+          }))
+          .reverse()
+          .map(({ listing, key }) => (
+            <AppBox
+              listing={listing}
+              onPress={() => navigation.navigate("Details", listing)}
+              key={key}
+            />
+          ))}
     </AppScreen>
   );
 };

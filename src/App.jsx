@@ -12,7 +12,7 @@ const App = () => {
     <FavoritesProvider>
       <StatusBar translucent={false} />
       <Navigator />
-      <FlashMessage position={"top"} />
+      <FlashMessage position={"top"} style={{ marginTop: 30 }} />
     </FavoritesProvider>
   );
 };

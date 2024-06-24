@@ -5,7 +5,7 @@ import { Avatar, Rating } from "react-native-elements";
 
 import { colors } from "../constants/colors";
 
-const AppReviewBox = ({ name, review }) => {
+const AppReviewBox = ({ name, review, rating }) => {
   return (
     <View style={styles.container}>
       <View style={styles.userIcon}>
@@ -20,8 +20,8 @@ const AppReviewBox = ({ name, review }) => {
           <View>
             <Rating
               imageSize={15}
-              fractions="{1}"
-              startingValue="{3.3}"
+              // fractions="{1}"
+              startingValue={rating}
               readonly
             />
           </View>

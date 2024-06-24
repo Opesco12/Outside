@@ -16,10 +16,10 @@ import {
   AntDesign,
   Ionicons,
   MaterialCommunityIcons,
+  FontAwesome5,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Rating } from "react-native-ratings";
-import { Avatar } from "react-native-elements";
 import {
   addDoc,
   collection,
@@ -28,10 +28,12 @@ import {
   orderBy,
   where,
   serverTimestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { showMessage } from "react-native-flash-message";
 import * as Yup from "yup";
 import { Formik } from "formik";
+import * as Linking from "expo-linking";
 
 import { colors } from "../constants/colors";
 import AppButtonBg from "../components/AppButton";
@@ -67,31 +69,59 @@ const DetailsScreen = ({ route }) => {
       createdAt: serverTimestamp(),
     })
       .then((documentRef) => {
-        console.log(documentRef);
-        showMessage({
-          type: "success",
-          message: "Your review has been posted",
-        });
+        if (documentRef) {
+          showMessage({
+            type: "success",
+            message: "Your review has been posted",
+          });
+        }
       })
       .catch((err) => console.log(err));
   };
 
   const getReviews = () => {
-    console.log("tapped");
     const ref = collection(firestore, listing.name);
 
     const documentsQuery = query(ref, orderBy("createdAt", "desc"));
-    getDocs(documentsQuery)
-      .then((snapshot) => {
-        snapshot.docs.forEach((review) => console.log(review));
-      })
-      .catch((err) => console.log(err));
+    try {
+      const unsubscribe = onSnapshot(documentsQuery, (querySnapshot) => {
+        const reviews = [];
+        querySnapshot.forEach((doc) => {
+          reviews.push({ ...doc.data() });
+        });
+
+        setReviews(reviews);
+      });
+
+      return unsubscribe;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     review: Yup.string().required("Enter your review"),
   });
+
+  const showDirections = (address) => {
+    const encodedAddress = encodeURI(address);
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}&travelmode=driving`;
+
+    Linking.canOpenURL(url)
+      .then(() => {
+        Linking.openURL(url);
+      })
+      .catch((err) =>
+        console.log("Error occured while trying to open url: ", err)
+      );
+  };
+
+  useEffect(() => {
+    const unsubscribe = getReviews();
+
+    return unsubscribe;
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.images}>
@@ -137,31 +167,51 @@ const DetailsScreen = ({ route }) => {
           </View>
           <Text style={styles.text}>Location: {listing.location}</Text>
           <Text style={styles.text}>Address: {listing.address}</Text>
-
+          <AppButtonBg
+            text={"Directions"}
+            icon={
+              <FontAwesome5 name="directions" color={colors.white} size={24} />
+            }
+            onPress={() =>
+              showDirections(listing.name + ", " + listing.address)
+            }
+            compStyle={{ width: "35%", textAlign: "center" }}
+          />
           <View>
             <Text style={[styles.text, { fontWeight: "600", fontSize: 20 }]}>
               Reviews
             </Text>
           </View>
-          {reviews &&
-            reviews.map((review, index) => (
-              <AppReviewBox name={review.name} review={review.review} />
-            ))}
-          <AppReviewBox name={"Divine"} review={"A very chill place"} />
-          <AppReviewBox name="Opeyemi" review={"NIce foods"} />
-          <AppReviewBox name={"Vic"} review={"Good customer service"} />
-          <Text
-            style={styles.more}
-            onPress={() =>
-              navigation.navigate("Reviews", { listingName: listing.name })
-            }
-          >
-            See more...
-          </Text>
-          <Text style={styles.tex} onPress={getReviews}>
-            Load Reviews
-          </Text>
+          {reviews && reviews.length > 0 ? (
+            reviews
+              .slice(0, 3)
+              .map((review, index) => (
+                <AppReviewBox
+                  name={review.name}
+                  review={review.review}
+                  rating={review.rating}
+                  key={index}
+                />
+              ))
+          ) : (
+            <Text style={[styles.text, { opacity: 0.6, textAlign: "center" }]}>
+              No Reviews Yet
+            </Text>
+          )}
 
+          {reviews && reviews.length > 2 && (
+            <Text
+              style={styles.more}
+              onPress={() =>
+                navigation.navigate("Reviews", {
+                  reviews,
+                  listingName: listing.name,
+                })
+              }
+            >
+              See more...
+            </Text>
+          )}
           <View>
             <Text style={[styles.text, { fontWeight: "600", fontSize: 20 }]}>
               Leave a review
@@ -173,10 +223,11 @@ const DetailsScreen = ({ route }) => {
                 review: "",
               }}
               validationSchema={validationSchema}
-              onSubmit={(values) => {
+              onSubmit={(values, { resetForm }) => {
                 const { name, review } = values;
 
                 uploadReview(name, review, rating);
+                resetForm();
               }}
             >
               {({ handleSubmit }) => (
@@ -212,13 +263,15 @@ const DetailsScreen = ({ route }) => {
           <AppButtonBg text={"Place an order"} compStyle={{ marginTop: 50 }} />
         </ScrollView>
       </View>
-      {/* <ImageView
-        images={listing.images.map((image) => ({ uri: image }))}
+      <ImageView
+        images={listing.images.map((image) => ({
+          uri: Image.resolveAssetSource(image).uri,
+        }))}
         imageIndex={currentImage}
         visible={visible}
         onRequestClose={() => setVisible(false)}
         swipeToCloseEnabled={true}
-      /> */}
+      />
     </View>
   );
 };
