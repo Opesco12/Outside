@@ -27,6 +27,7 @@ const FavoritesProvider = ({ children }) => {
         (listing, index) => listing !== data
       );
       setFavorites(newFavorites);
+      await AsyncStorage.setItem("appData", JSON.stringify(newFavorites));
     } else {
       try {
         await setFavorites((prev) => [...prev, data]);
