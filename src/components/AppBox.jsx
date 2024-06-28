@@ -27,10 +27,10 @@ const AppBox = ({ listing, onPress }) => {
         <View style={styles.top}>
           {listing.images.length > 1 ? (
             thumbnailImages.map((image, index) => (
-              <Image source={image} key={index} style={styles.images} />
+              <Image src={image} key={index} style={styles.images} />
             ))
           ) : (
-            <Image source={listing.images[0]} style={styles.image} />
+            <Image src={listing.images[0]} style={styles.image} />
           )}
         </View>
         <View style={styles.bottom}>

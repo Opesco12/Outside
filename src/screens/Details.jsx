@@ -140,7 +140,7 @@ const DetailsScreen = ({ route }) => {
                 setVisible(true);
               }}
             >
-              <Image source={image} style={styles.image} />
+              <Image src={image} style={styles.image} />
             </TouchableWithoutFeedback>
           ))}
         </Swiper>
@@ -260,12 +260,23 @@ const DetailsScreen = ({ route }) => {
             </Formik>
           </View>
 
-          <AppButtonBg text={"Place an order"} compStyle={{ marginTop: 50 }} />
+          {listing.phone && listing.type !== "resort" && (
+            <AppButtonBg
+              text={
+                listing.type === "restaurant"
+                  ? "Place an order"
+                  : listing.type === "lodge"
+                  ? "Make a booking"
+                  : "Make a reservation"
+              }
+              compStyle={{ marginTop: 50 }}
+            />
+          )}
         </ScrollView>
       </View>
       <ImageView
         images={listing.images.map((image) => ({
-          uri: Image.resolveAssetSource(image).uri,
+          uri: image,
         }))}
         imageIndex={currentImage}
         visible={visible}

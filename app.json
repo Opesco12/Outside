@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Outside",
+    "name": "Ìtáláwá",
     "slug": "Outside",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/images/Outside.png",
+    "icon": "./src/assets/images/Ìtáláwá.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/images/Outside.png",
+        "foregroundImage": "./src/assets/images/Ìtáláwá.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.opesco.Outside"
