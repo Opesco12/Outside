@@ -7,7 +7,7 @@ const ListingProvider = ({ children }) => {
   const [listings, setListings] = useState([]);
 
   const fetchData = () => {
-    const binId = "667ea925ad19ca34f8801209";
+    const binId = "668b2864ad19ca34f884581b";
     const secretKey =
       "$2a$10$4wrB9OCGsgFtmqSKZewRu.bLuVWlUsWpFT2JAofJQuRhiIOayxACu";
 
